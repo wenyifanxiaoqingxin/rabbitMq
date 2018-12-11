@@ -1,5 +1,6 @@
 package com.learning.rabbitmq.demo.controller;
 
+import com.learning.rabbitmq.demo.util.RabbitMqSender;
 import com.learning.rabbitmq.demo.vo.SendMessage;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +17,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class sendMessageController {
 
     @Autowired
-    private RabbitTemplate rabbitTemplate;
+    private RabbitMqSender rabbitMqSender;
 
     @RequestMapping("/send")
     @ResponseBody
     public String send(@RequestBody SendMessage sendMessage){
-
-        rabbitTemplate.convertAndSend(sendMessage.getExchangeName(),sendMessage.getRoutingKey(),sendMessage.getMessage());
+        rabbitMqSender.sendRabbitmqTopic(sendMessage.getExchangeName(),sendMessage.getRoutingKey(),sendMessage.getMessage());
         return "success";
     }
 
