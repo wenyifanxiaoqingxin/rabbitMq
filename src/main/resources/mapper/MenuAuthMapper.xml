@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.learning.rabbitmq.demo.dao.mybatis.MenuAuthMapper">
+  <resultMap id="BaseResultMap" type="com.learning.rabbitmq.demo.entity.mybatis.MenuAuth">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="auth_name" jdbcType="VARCHAR" property="authName" />
+    <result column="auth_url" jdbcType="VARCHAR" property="authUrl" />
+    <result column="auth_permission" jdbcType="VARCHAR" property="authPermission" />
+    <result column="auth_type" jdbcType="VARCHAR" property="authType" />
+    <result column="auth_status" jdbcType="VARCHAR" property="authStatus" />
+    <result column="auth_descrtion" jdbcType="VARCHAR" property="authDescrtion" />
+    <result column="auth_parent_id" jdbcType="VARCHAR" property="authParentId" />
+    <result column="auth_order" jdbcType="INTEGER" property="authOrder" />
+  </resultMap>
+
+  <resultMap id="MenuTreeResultMap" type="com.learning.rabbitmq.demo.common.vo.MenuTree" extends="BaseResultMap">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result property="userId" jdbcType="VARCHAR" column="c_user_id"/>
+    <collection property="subMenu" select="selectMenu" column="{id=id,userId=c_user_id}"/>
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    id, auth_name, auth_url, auth_permission, auth_type, auth_status, auth_descrtion, 
+    auth_parent_id, auth_order
+  </sql>
+  <select id="countByExample" parameterType="com.learning.rabbitmq.demo.entity.mybatis.MenuAuthExample" resultType="java.lang.Long">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    select count(*) from menu_auth
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+
+  <select id="selectMenu" resultMap="MenuTreeResultMap">
+    select c.*, a.c_user_id from t_user_role a
+    left join t_role_auth b on a.c_role_id = b.c_role_id
+    left join menu_auth c on b.c_auth_id = c.id
+    where c.auth_status = '1' and c.auth_type = '0'
+    and a.c_user_id = #{userId} and c.auth_parent_id =#{id}
+    order by c.auth_order desc
+  </select>
+</mapper>

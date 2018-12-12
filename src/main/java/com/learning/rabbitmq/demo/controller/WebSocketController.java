@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/websocket")
 public class WebSocketController {
 
+    @RequestMapping("/html")
     public String html(){
         return "web";
     }

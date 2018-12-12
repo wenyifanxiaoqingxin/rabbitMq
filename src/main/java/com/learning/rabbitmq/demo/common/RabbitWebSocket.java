@@ -3,7 +3,9 @@ package com.learning.rabbitmq.demo.common;
 import com.rabbitmq.client.*;
 import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.server.standard.SpringConfigurator;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
@@ -19,8 +21,11 @@ import java.util.concurrent.TimeoutException;
 @Component
 public class RabbitWebSocket {
 
+    private static  RabbitPropertiesValue rabbitPropertiesValue;
     @Autowired
-    private RabbitProperties  rabbitProperties;
+    public void setRabbitPropertiesValue(RabbitPropertiesValue rabbitPropertiesValue){
+        RabbitWebSocket.rabbitPropertiesValue = rabbitPropertiesValue;
+    }
 
     private static org.apache.logging.log4j.Logger log = LogManager.getLogger(RabbitWebSocket.class);
 
@@ -41,15 +46,18 @@ public class RabbitWebSocket {
         try {
             //创建连接连接到MabbitMQ
             ConnectionFactory connectionFactory = new ConnectionFactory();
-            connectionFactory.setHost(rabbitProperties.getHost());
-            connectionFactory.setUsername(rabbitProperties.getUsername());
-            connectionFactory.setPassword(rabbitProperties.getPwd());
+            connectionFactory.setHost(rabbitPropertiesValue.getHost());
+            connectionFactory.setUsername(rabbitPropertiesValue.getUsername());
+            connectionFactory.setPassword(rabbitPropertiesValue.getPwd());
+            connectionFactory.setPort(Integer.parseInt(rabbitPropertiesValue.getPort()));
             //创建连接
             Connection connection = connectionFactory.newConnection();
             //创建频道
             Channel channel =connection.createChannel();
-
+            channel.exchangeDeclare("exchange","topic",true,false,null);
             channel.queueDeclare(queneName,true,false,false,null);
+            channel.queueBind(queneName,"exchange","exchange");
+
             channel.basicQos(1);
 
             log.info("[*]waiting for messages");
@@ -63,7 +71,7 @@ public class RabbitWebSocket {
                     try {
                         message = new String(body, "UTF-8");
                         //消息处理逻辑
-                        sendMessage(message);
+                        sendMessageAll(message);
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                         channel.abort();
@@ -108,8 +116,11 @@ public class RabbitWebSocket {
         log.info("来自客户端的消息:" + message);
         //群发消息
         for (RabbitWebSocket item : webSocketSet) {
+            if(item.session == session){
+                continue;
+            }
             try {
-                item.sendMessage(message);
+                item.sendMessage(message,session);
             } catch (IOException e) {
                 e.printStackTrace();
                 continue;
@@ -135,11 +146,32 @@ public class RabbitWebSocket {
      * @param message
      * @throws IOException
      */
-    public void sendMessage(String message) throws IOException {
+    public void sendMessage(String message,Session session) throws IOException {
         //阻塞式的(同步的)
         if (sessions.size() != 0) {
             for (Session s : sessions) {
-                if (s != null) {
+                if (s != null &&s!=session){
+                    s.getBasicRemote().sendText(session.getId()+":"+message);
+                }
+            }
+        }
+
+        //非阻塞式的（异步的）
+//        this.session.getAsyncRemote().sendText(message);
+        log.info("[x] 推送消息"+message);
+    }
+
+    /**
+     * 这个方法与上面几个方法不一样。没有用注解，是根据自己需要添加的方法。
+     *
+     * @param message
+     * @throws IOException
+     */
+    public void sendMessageAll(String message) throws IOException {
+        //阻塞式的(同步的)
+        if (sessions.size() != 0) {
+            for (Session s : sessions) {
+                if (s != null){
                     s.getBasicRemote().sendText(message);
                 }
             }

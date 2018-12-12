@@ -2,13 +2,14 @@ package com.learning.rabbitmq.demo.common;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 /**
  * Created by fx on 2018/10/18.
  */
 @Component
-public class RabbitProperties {
+public class RabbitPropertiesValue {
 
     @Value("${spring.application.name}")
     private String  name;

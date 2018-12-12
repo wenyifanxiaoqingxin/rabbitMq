@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 @RequestMapping("/rabbit")
-public class sendMessageController {
+public class SendMessageController {
 
     @Autowired
     private RabbitMqSender rabbitMqSender;
@@ -24,6 +24,11 @@ public class sendMessageController {
     public String send(@RequestBody SendMessage sendMessage){
         rabbitMqSender.sendRabbitmqTopic(sendMessage.getExchangeName(),sendMessage.getRoutingKey(),sendMessage.getMessage());
         return "success";
+    }
+
+    @RequestMapping("/html")
+    public String html(){
+        return "web";
     }
 
 }
