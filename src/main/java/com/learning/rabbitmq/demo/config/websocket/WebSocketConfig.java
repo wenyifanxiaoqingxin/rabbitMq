@@ -1,4 +1,4 @@
-package com.learning.rabbitmq.demo.config;
+package com.learning.rabbitmq.demo.config.websocket;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

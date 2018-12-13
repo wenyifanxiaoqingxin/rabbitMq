@@ -6,5 +6,5 @@ import tk.mybatis.mapper.common.Mapper;
 
 public interface UserMapper extends Mapper<User> {
     long countByExample(UserExample example);
-    User getUser(String username);
+     User getUser(String username);
 }

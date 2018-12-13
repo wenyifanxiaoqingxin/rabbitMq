@@ -80,4 +80,18 @@
     and a.c_user_id = #{userId} and c.auth_parent_id =#{id}
     order by c.auth_order desc
   </select>
+
+  <select id="getAuthById" parameterType="java.util.List" resultMap="BaseResultMap">
+    SELECT * FROM rabbitmq.t_role_auth  a left join menu_auth  m on a.c_auth_id = m.id where m.auth_status = '1'
+    <if test="ids!=null">
+      <if test="ids.size > 0">
+        and  c_role_id IN
+        <foreach collection="ids" open="(" separator="," close=")" item="id" index="index">
+          #{id}
+        </foreach>
+      </if>
+      <if test="ids.size == 0">AND 1=0</if>
+    </if>
+
+  </select>
 </mapper>

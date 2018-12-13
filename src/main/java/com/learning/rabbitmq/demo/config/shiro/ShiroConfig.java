@@ -49,6 +49,8 @@ public class ShiroConfig {
         //登录接口开发
         filterChainMap.put("/login","anon");
         filterChainMap.put("/loginIn","anon");
+
+        filterChainMap.put("/websocket/**","anon");
         //拦截其他接口,要放在最后，不然会拦截所有接口
         filterChainMap.put("/**","authc");
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainMap);

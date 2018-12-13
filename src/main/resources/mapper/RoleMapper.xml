@@ -55,4 +55,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </select>
+  <select id="getRoleById" parameterType="java.lang.String" resultMap="BaseResultMap">
+    SELECT * FROM t_user_role u left join role r on u.c_role_id = r.id WHERE 1=1 and u.c_user_id=#{id}
+  </select>
 </mapper>

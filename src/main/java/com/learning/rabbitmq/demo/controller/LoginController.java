@@ -9,12 +9,16 @@ import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import javax.websocket.Session;
 
 /**
  * Created by fx on 2018/12/12.
@@ -37,7 +41,7 @@ public class LoginController {
     }
     @RequestMapping("/loginIn")
     @ResponseBody
-    public AjaxResult loginIn(String username, String password){
+    public AjaxResult loginIn(String username, String password,HttpServletRequest request){
         AjaxResult result = new AjaxResult();
         try{
             Subject subject = SecurityUtils.getSubject();
@@ -46,6 +50,9 @@ public class LoginController {
             //执行登陆
             subject.login(usernamePasswordToken);
 
+            HttpSession session = request.getSession();
+            session.setAttribute("user",SecurityUtils.getSubject().getPrincipal());
+            System.out.println("session放入："+session.getAttribute("user"));
             result.setCode(AjaxResult.SUCCESS);
             result.setMessage("成功");
         }catch (UnknownAccountException e){

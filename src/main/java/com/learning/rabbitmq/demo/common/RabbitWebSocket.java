@@ -1,43 +1,54 @@
 package com.learning.rabbitmq.demo.common;
 
+import com.learning.rabbitmq.demo.config.websocket.GetHttpSessionConfigurator;
+import com.learning.rabbitmq.demo.dao.mybatis.UserMapper;
+import com.learning.rabbitmq.demo.entity.mybatis.User;
 import com.rabbitmq.client.*;
 import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.server.standard.SpringConfigurator;
+import org.springframework.web.bind.annotation.PathVariable;
 
+import javax.servlet.http.HttpSession;
 import javax.websocket.*;
+import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeoutException;
 
 /**
  * Created by fx on 2018/10/18.
  */
-@ServerEndpoint(value = "/websocket")
+@ServerEndpoint(value = "/websocket/{userId}")
 @Component
 public class RabbitWebSocket {
 
     private static  RabbitPropertiesValue rabbitPropertiesValue;
+    private static UserMapper userMapper;
     @Autowired
-    public void setRabbitPropertiesValue(RabbitPropertiesValue rabbitPropertiesValue){
+    public void setRabbitPropertiesValue(RabbitPropertiesValue rabbitPropertiesValue,UserMapper userMapper){
         RabbitWebSocket.rabbitPropertiesValue = rabbitPropertiesValue;
+        RabbitWebSocket.userMapper = userMapper;
     }
 
     private static org.apache.logging.log4j.Logger log = LogManager.getLogger(RabbitWebSocket.class);
 
     private Session session;
+    private static Map<String,User> httpSessions = new HashMap<>(4);
     private static CopyOnWriteArraySet<Session> sessions = new CopyOnWriteArraySet<>();
     private static  int onlineCount = 0;
     private static CopyOnWriteArraySet<RabbitWebSocket> webSocketSet = new CopyOnWriteArraySet<RabbitWebSocket>();
 
 
     @OnOpen
-    public void onOpen(Session session){
+    public void onOpen(@PathParam("userId") String userIds, Session session){
         this.session = session;
+        User user = userMapper.selectByPrimaryKey(userIds);
+        httpSessions.put(session.getId(),user);
         sessions.add(session);
         webSocketSet.add(this);
         addOnlineCount();
@@ -101,6 +112,7 @@ public class RabbitWebSocket {
     public void onClose() {
         webSocketSet.remove(this);  //从set中删除
         sessions.remove(session);
+        httpSessions.remove(session.getId());
         subOnlineCount();           //在线数减1
         log.info("有一连接关闭！当前在线人数为" + getOnlineCount());
     }
@@ -151,7 +163,7 @@ public class RabbitWebSocket {
         if (sessions.size() != 0) {
             for (Session s : sessions) {
                 if (s != null &&s!=session){
-                    s.getBasicRemote().sendText(session.getId()+":"+message);
+                    s.getBasicRemote().sendText(httpSessions.get(session.getId()).getUsername()+"："+message);
                 }
             }
         }
@@ -192,4 +204,5 @@ public class RabbitWebSocket {
     public static synchronized void subOnlineCount() {
         RabbitWebSocket.onlineCount--;
     }
+
 }

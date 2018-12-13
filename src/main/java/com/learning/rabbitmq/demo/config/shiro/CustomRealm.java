@@ -1,6 +1,10 @@
 package com.learning.rabbitmq.demo.config.shiro;
 
+import com.learning.rabbitmq.demo.dao.mybatis.MenuAuthMapper;
+import com.learning.rabbitmq.demo.dao.mybatis.RoleMapper;
 import com.learning.rabbitmq.demo.dao.mybatis.UserMapper;
+import com.learning.rabbitmq.demo.entity.mybatis.MenuAuth;
+import com.learning.rabbitmq.demo.entity.mybatis.Role;
 import com.learning.rabbitmq.demo.entity.mybatis.User;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
@@ -13,7 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -23,9 +29,14 @@ public class CustomRealm extends AuthorizingRealm{
 
     private Logger logger = LoggerFactory.getLogger(CustomRealm.class);
     private UserMapper userMapper;
+    private MenuAuthMapper menuAuthMapper;
+    private RoleMapper roleMapper;
+
     @Autowired
-    private void setUserMapper(UserMapper userMapper){
+    private void setUserMapper(UserMapper userMapper,MenuAuthMapper menuAuthMapper,RoleMapper roleMapper){
         this.userMapper = userMapper;
+        this.menuAuthMapper = menuAuthMapper;
+        this.roleMapper = roleMapper;
     }
 
 
@@ -62,10 +73,18 @@ public class CustomRealm extends AuthorizingRealm{
         logger.info("----权限认证----");
         User user  = (User) SecurityUtils.getSubject().getPrincipal();
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
-        Set<String> set = new HashSet<>();
-        //需要将 role 封装到 Set 作为 info.setRoles() 的参数
-        set.add(user.getRole());
-        simpleAuthorizationInfo.setRoles(set);
+        List<Role> roles = roleMapper.getRoleById(user.getId());
+        List<String> roleIds = new ArrayList<>();
+        for(int i=0;i<roles.size();i++){
+            simpleAuthorizationInfo.addRole(roles.get(i).getRole());
+            roleIds.add(roles.get(i).getId());
+        }
+
+        List<MenuAuth> menuAuths = menuAuthMapper.getAuthById(roleIds);
+        for(int j=0;j<roles.size();j++){
+            simpleAuthorizationInfo.addStringPermission(menuAuths.get(j).getAuthName());
+        }
+
         return simpleAuthorizationInfo;
     }
 }

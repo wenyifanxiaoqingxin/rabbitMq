@@ -4,19 +4,46 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>WebSocket</title>
     <div th:include="common/common"></div>
 </head>
 <body>
 <div id="main" class="containerDiv">
+
+
     <h2 id="connectMessage" style="text-align: center"></h2>
     <div  id="message" style="text-align: center"></div>
     <input type="hidden" th:value="${userId}" id="userId" />
     <input type="hidden" th:value="${username}" id="username" />
 
-     <div style="p-bottom: 20%"><input type="text" value="" id="sendMessage" />
-         <button onclick="sendMessage()">发送</button>
-     </div>
+    <div style="padding-bottom: 20%"><input type="text" value="" id="sendMessage" />
+        <button onclick="sendMessage()">发送</button>
+    </div>
+    <!--<div class="site-demo-button">-->
+        <!--<button class="layui-btn site-demo-layim" data-type="chat">自定义会话</button>-->
+        <!--<button class="layui-btn site-demo-layim" data-type="message">接受好友的消息</button>-->
+        <!--<button class="layui-btn site-demo-layim" data-type="messageAudio">接受音频消息</button>-->
+        <!--<button class="layui-btn site-demo-layim" data-type="messageVideo">接受视频消息</button>-->
+        <!--<button class="layui-btn site-demo-layim" data-type="messageTemp">接受临时会话消息</button>-->
+
+        <!--<br>-->
+
+        <!--<button class="layui-btn site-demo-layim" data-type="add">申请好友</button>-->
+        <!--<button class="layui-btn site-demo-layim" data-type="addqun">申请加群</button>-->
+        <!--<button class="layui-btn site-demo-layim" data-type="addFriend">同意好友</button>-->
+        <!--<button class="layui-btn site-demo-layim" data-type="addGroup">增加群组到主面板</button>-->
+        <!--<button class="layui-btn site-demo-layim" data-type="removeFriend">删除主面板好友</button>-->
+        <!--<button class="layui-btn site-demo-layim" data-type="removeGroup">删除主面板群组</button>-->
+
+        <!--<br>-->
+        <!--<button class="layui-btn site-demo-layim" data-type="setGray">置灰离线好友</button>-->
+        <!--<button class="layui-btn site-demo-layim" data-type="unGray">取消好友置灰</button>-->
+        <!--<a href="http://layim.layui.com/kefu.html" class="layui-btn site-demo-layim" target="_blank">客服模式</a>-->
+        <!--<button class="layui-btn site-demo-layim" data-type="mobile">移动端版本</button>-->
+    <!--</div>-->
 </div>
 </body>
 <style type="text/css" >
@@ -76,4 +103,5 @@
         document.getElementById('message').innerHTML += html;
     }
 </script>
+<script th:src="@{/js/chat/chat.js}"></script>
 </html>

@@ -13,4 +13,6 @@ public interface MenuAuthMapper extends Mapper<MenuAuth> {
 
     List<MenuTree> selectMenu(@Param("id") String id, @Param("userId") String userId);
 
+    List<MenuAuth> getAuthById(List<String> ids);
+
 }
