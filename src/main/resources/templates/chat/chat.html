@@ -8,6 +8,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>WebSocket</title>
+    <script th:src="@{/js/jquery-1.11.1.min.js}"></script>
     <div th:include="common/common"></div>
 </head>
 <body>
@@ -19,9 +20,9 @@
     <input type="hidden" th:value="${userId}" id="userId" />
     <input type="hidden" th:value="${username}" id="username" />
 
-    <div style="padding-bottom: 20%"><input type="text" value="" id="sendMessage" />
-        <button onclick="sendMessage()">发送</button>
-    </div>
+    <!--<div style="padding-bottom: 20%"><input type="text" value="" id="sendMessage" />-->
+        <!--<button onclick="sendMessage()">发送</button>-->
+    <!--</div>-->
     <!--<div class="site-demo-button">-->
         <!--<button class="layui-btn site-demo-layim" data-type="chat">自定义会话</button>-->
         <!--<button class="layui-btn site-demo-layim" data-type="message">接受好友的消息</button>-->
@@ -57,51 +58,11 @@
     }
 </style>
 <script type="text/javascript">
-    var websocket = null;
 
-    //判断当前浏览器是否支持WebSocket
-    if ('WebSocket' in window) {
-        websocket = new WebSocket("ws://192.168.2.70:8090/websocket/"+$("#userId").val());
-    }
-    else {
-        alert('当前浏览器 不支持WebSocket')
-    }
 
-    //连接发生错误的回调方法
-    websocket.onerror = function () {
-        document.getElementById('connectMessage').innerHTML += "连接发生错误,请重试" + '<br/>';
-    };
 
-    //连接成功建立的回调方法
-    websocket.onopen = function () {
-        document.getElementById('connectMessage').innerHTML += "欢迎用户："+$("#username").val()+",连接成功" + '<br/>';
-    }
-
-    //接收到消息的回调方法，此处添加处理接收消息方法，当前是将接收到的信息显示在网页上
-    websocket.onmessage = function (event) {
-        setMessageInnerHTML(event.data);
-    }
-
-    //连接关闭的回调方法
-    websocket.onclose = function () {
-        setMessageInnerHTML("连接关闭,如需登录请刷新页面。");
-    }
-    function sendMessage(){
-        var html = '<p class="fontsize" style="text-align: right">'+ $("#username").val()+'：'+ document.getElementById("sendMessage").value +'</p>'
-        document.getElementById('message').innerHTML +=html;
-        websocket.send(document.getElementById("sendMessage").value)
-    }
-
-    //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
-    window.onbeforeunload = function () {
-        closeWebSocket();
-    }
-
-    //将消息显示在网页上，如果不需要显示在网页上，则不调用该方法
-    function setMessageInnerHTML(innerHTML) {
-        var html = '<p class="fontsize" style="text-align: left">'+ innerHTML+'</p>'
-        document.getElementById('message').innerHTML += html;
-    }
 </script>
+<script th:src="@{/js/layui/layui.js}"></script>
 <script th:src="@{/js/chat/chat.js}"></script>
+
 </html>

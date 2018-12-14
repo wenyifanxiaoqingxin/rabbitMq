@@ -64,6 +64,6 @@
   </select>
 
   <select id="getUser" parameterType="java.lang.String" resultMap="BaseResultMap">
-    SELECT * FROM user where username=#{username}
+    SELECT * FROM user where account=#{username}
   </select>
 </mapper>

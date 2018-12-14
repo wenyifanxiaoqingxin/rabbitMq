@@ -1,4 +1,59 @@
+
 layui.use('layim', function(){
+    var $ = layui.$ //由于layer弹层依赖jQuery，所以可以直接得到
+    var websocket = null;
+
+    //判断当前浏览器是否支持WebSocket
+    if ('WebSocket' in window) {
+        websocket = new WebSocket("ws://192.168.2.70:8090/websocket/"+$("#userId").val());
+    }
+    else {
+        alert('当前浏览器 不支持WebSocket')
+    }
+
+    //连接发生错误的回调方法
+    websocket.onerror = function () {
+        document.getElementById('connectMessage').innerHTML += "连接发生错误,请重试" + '<br/>';
+    };
+
+    //连接成功建立的回调方法
+    websocket.onopen = function () {
+        document.getElementById('connectMessage').innerHTML += "欢迎用户："+$("#username").val()+",连接成功" + '<br/>';
+    }
+
+    //接收到消息的回调方法，此处添加处理接收消息方法，当前是将接收到的信息显示在网页上
+    websocket.onmessage = function (res) {
+        layim.setChatStatus("");
+        res = JSON.parse(res.data);
+        // res = {username: "纸飞机" //消息来源用户名
+        //     ,avatar: "http://tp1.sinaimg.cn/1571889140/180/40030060651/1" //消息来源用户头像
+        //     ,id: "1" //消息的来源ID（如果是私聊，则是用户id，如果是群聊，则是群组id）
+        //     ,type: "friend" //聊天窗口来源类型，从发送消息传递的to里面获取
+        //     ,content: "嗨，你好！本消息系离线消息。" //消息内容
+        //     ,cid: 0 //消息id，可不传。除非你要对消息进行一些操作（如撤回）
+        //     ,mine: false //是否我发送的消息，如果为true，则会显示在右方
+        //     ,fromid: "100000" //消息的发送者id（比如群组中的某个消息发送者），可用于自动解决浏览器多窗口时的一些问题
+        //     ,timestamp: 1467475443306
+        // }
+        layim.getMessage(res);
+    }
+
+    //连接关闭的回调方法
+    websocket.onclose = function () {
+        setMessageInnerHTML("连接关闭,如需登录请刷新页面。");
+    }
+    function sendMessage(){
+        var html = '<p class="fontsize" style="text-align: right">'+ $("#username").val()+'：'+ document.getElementById("sendMessage").value +'</p>'
+        document.getElementById('message').innerHTML +=html;
+        websocket.send(document.getElementById("sendMessage").value)
+    }
+
+    //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+    window.onbeforeunload = function () {
+        closeWebSocket();
+    }
+
+
     var layim = layui.layim;
 
     //演示自动回复
@@ -19,23 +74,23 @@ layui.use('layim', function(){
         //初始化接口
         init: {
             // url: '/layim/json/getList.json'
-            mine: {"username": "纸飞机"
-                ,"id": "100000"
+            mine: {"username": $("#username").val()
+                ,"id": $("#userId").val()
                 ,"status": "online"
                 ,"sign": "在深邃的编码世界，做一枚轻盈的纸飞机"
-                ,"avatar": "//res.layui.com/images/fly/avatar/00.jpg"}
+                ,"avatar": "//tva1.sinaimg.cn/crop.0.0.118.118.180/5db11ff4gw1e77d3nqrv8j203b03cweg.jpg"}
             ,friend: [{
                 "groupname": "知名人物"
                 ,"id": 0
                 ,"list": [{
                     "username": "贤心"
-                    ,"id": "100001"
+                    ,"id": "3"
                     ,"avatar": "//tva1.sinaimg.cn/crop.0.0.118.118.180/5db11ff4gw1e77d3nqrv8j203b03cweg.jpg"
                     ,"sign": "这些都是测试数据，实际使用请严格按照该格式返回"
                     ,"status": "online"
                 },{
-                    "username": "刘小涛"
-                    ,"id": "100001222"
+                    "username": "纸飞机"
+                    ,"id": "1"
                     ,"sign": "如约而至，不负姊妹欢乐颂"
                     ,"avatar": "//tva4.sinaimg.cn/crop.0.1.1125.1125.180/475bb144jw8f9nwebnuhkj20v90vbwh9.jpg"
                 },{
@@ -114,7 +169,7 @@ layui.use('layim', function(){
             // ,data: {}
             list:[{
                 "username": "贤心"
-                ,"id": "100001"
+                ,"id": "3"
                 ,"avatar": "//tva1.sinaimg.cn/crop.0.0.118.118.180/5db11ff4gw1e77d3nqrv8j203b03cweg.jpg"
                 ,"sign": "这些都是测试数据，实际使用请严格按照该格式返回"
             },{
@@ -240,36 +295,41 @@ layui.use('layim', function(){
     });
     //监听发送消息
     layim.on('sendMessage', function(data){
+
+
         var To = data.to;
         //console.log(data);
 
         if(To.type === 'friend'){
             layim.setChatStatus('<span style="color:#FF5722;">对方正在输入。。。</span>');
         }
-
+        websocket.send(JSON.stringify({
+            type: 'chatMessage' //随便定义，用于在服务端区分消息类型
+            ,data: data
+        }));
         //演示自动回复
-        setTimeout(function(){
-            var obj = {};
-            if(To.type === 'group'){
-                obj = {
-                    username: '模拟群员'+(Math.random()*100|0)
-                    ,avatar: layui.cache.dir + 'images/face/'+ (Math.random()*72|0) + '.gif'
-                    ,id: To.id
-                    ,type: To.type
-                    ,content: autoReplay[Math.random()*9|0]
-                }
-            } else {
-                obj = {
-                    username: To.name
-                    ,avatar: To.avatar
-                    ,id: To.id
-                    ,type: To.type
-                    ,content: autoReplay[Math.random()*9|0]
-                }
-                layim.setChatStatus('<span style="color:#FF5722;">在线</span>');
-            }
-            layim.getMessage(obj);
-        }, 1000);
+        // setTimeout(function(){
+        //     var obj = {};
+        //     if(To.type === 'group'){
+        //         obj = {
+        //             username: '模拟群员'+(Math.random()*100|0)
+        //             ,avatar: layui.cache.dir + 'images/face/'+ (Math.random()*72|0) + '.gif'
+        //             ,id: To.id
+        //             ,type: To.type
+        //             ,content: autoReplay[Math.random()*9|0]
+        //         }
+        //     } else {
+        //         obj = {
+        //             username: To.name
+        //             ,avatar: To.avatar
+        //             ,id: To.id
+        //             ,type: To.type
+        //             ,content: autoReplay[Math.random()*9|0]
+        //         }
+        //         layim.setChatStatus('<span style="color:#FF5722;">在线</span>');
+        //     }
+        //     layim.getMessage(obj);
+        // }, 1000);
     });
     //监听查看群员
     layim.on('members', function(data){
@@ -528,3 +588,9 @@ layui.use('layim', function(){
         active[type] ? active[type].call(this) : '';
     });
 });
+
+//将消息显示在网页上，如果不需要显示在网页上，则不调用该方法
+function setMessageInnerHTML(innerHTML) {
+    var html = '<p class="fontsize" style="text-align: left">'+ innerHTML+'</p>'
+    document.getElementById('message').innerHTML += html;
+}
