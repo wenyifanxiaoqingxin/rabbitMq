@@ -1,6 +1,5 @@
 package com.learning.rabbitmq.demo.consumer;
 
-import com.sun.tools.doclets.formats.html.SourceToHTMLConverter;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
