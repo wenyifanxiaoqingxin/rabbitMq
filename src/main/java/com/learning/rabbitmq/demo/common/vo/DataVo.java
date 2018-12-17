@@ -13,7 +13,7 @@ public class DataVo {
 
     private List<FriendVo> friend;
 
-    private GroupVo group;
+    private List<GroupVo> group;
 
     public UserInformationVo getMine() {
         return mine;
@@ -31,11 +31,11 @@ public class DataVo {
         this.friend = friend;
     }
 
-    public GroupVo getGroup() {
+    public List<GroupVo> getGroup() {
         return group;
     }
 
-    public void setGroup(GroupVo group) {
+    public void setGroup(List<GroupVo> group) {
         this.group = group;
     }
 }

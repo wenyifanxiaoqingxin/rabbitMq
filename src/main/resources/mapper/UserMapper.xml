@@ -15,6 +15,20 @@
     <result column="avatar" jdbcType="VARCHAR" property="avatar" />
     <result column="status" jdbcType="VARCHAR" property="status" />
   </resultMap>
+  <resultMap id="userInfoResultMap" type="com.learning.rabbitmq.demo.vo.UserInformationVo">
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="sign" jdbcType="VARCHAR" property="sign" />
+    <result column="avatar" jdbcType="VARCHAR" property="avatar" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+
+  </resultMap>
+
+  <resultMap id="getListJsonResult" type="com.learning.rabbitmq.demo.common.vo.FriendVo">
+    <result column="group_name" jdbcType="VARCHAR" property="groupname" />
+    <result column="c_group_id" jdbcType="VARCHAR" property="id" />
+    <collection property="list" resultMap="userInfoResultMap" ofType="com.learning.rabbitmq.demo.vo.UserInformationVo"></collection>
+  </resultMap>
   <sql id="Example_Where_Clause">
     <!--
       WARNING - @mbg.generated
@@ -65,5 +79,9 @@
 
   <select id="getUser" parameterType="java.lang.String" resultMap="BaseResultMap">
     SELECT * FROM user where account=#{username}
+  </select>
+  <select id="getListJosn" resultMap="getListJsonResult" parameterType="java.lang.String">
+    SELECT g.group_name,g.group_id,u.* FROM t_subgroup s left join t_friends_group g on s.c_group_id = g.group_id
+    left join user u  on g.c_user_id = u.id where s.c_user_id = #{userId};
   </select>
 </mapper>

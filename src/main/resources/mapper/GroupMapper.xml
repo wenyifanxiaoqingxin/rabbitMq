@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.learning.rabbitmq.demo.dao.mybatis.RoleMapper">
-  <resultMap id="BaseResultMap" type="com.learning.rabbitmq.demo.entity.mybatis.Role">
+<mapper namespace="com.learning.rabbitmq.demo.dao.mybatis.GroupMapper">
+  <resultMap id="BaseResultMap" type="com.learning.rabbitmq.demo.entity.mybatis.Group">
     <!--
       WARNING - @mbg.generated
     -->
     <id column="id" jdbcType="VARCHAR" property="id" />
-    <result column="role" jdbcType="VARCHAR" property="role" />
+    <result column="group_name" jdbcType="VARCHAR" property="groupName" />
+    <result column="avatar" jdbcType="VARCHAR" property="avatar" />
+  </resultMap>
+  <resultMap id="GroupResultMap" type="com.learning.rabbitmq.demo.common.vo.GroupVo">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="group_name" jdbcType="VARCHAR" property="groupname" />
+    <result column="avatar" jdbcType="VARCHAR" property="avatar" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <!--
@@ -44,18 +53,19 @@
     <!--
       WARNING - @mbg.generated
     -->
-    id, role
+    id, group_name, avatar
   </sql>
-  <select id="countByExample" parameterType="com.learning.rabbitmq.demo.entity.mybatis.RoleExample" resultType="java.lang.Long">
+  <select id="countByExample" parameterType="com.learning.rabbitmq.demo.entity.mybatis.GroupExample" resultType="java.lang.Long">
     <!--
       WARNING - @mbg.generated
     -->
-    select count(*) from role
+    select count(*) from t_group
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </select>
-  <select id="getRoleById" parameterType="java.lang.String" resultMap="BaseResultMap">
-    SELECT r.* FROM t_user_role u left join role r on u.c_role_id = r.id WHERE 1=1 and u.c_user_id=#{id}
+
+  <select id="getGroup" parameterType="java.lang.String" resultMap="GroupResultMap">
+    SELECT * FROM t_user_group u left join t_group g on u.c_group_id = g.id where u.c_user_id=#{userId};
   </select>
 </mapper>

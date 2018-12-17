@@ -17,6 +17,7 @@ public class UserInformationVo implements Serializable{
     private String cid;
     private boolean mine;
     private String fromid;
+    private String status;
     private long timestamp;
 
     public String getId() {
@@ -105,5 +106,13 @@ public class UserInformationVo implements Serializable{
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

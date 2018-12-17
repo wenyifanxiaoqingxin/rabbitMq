@@ -74,13 +74,13 @@ public class CustomRealm extends AuthorizingRealm{
         User user  = (User) SecurityUtils.getSubject().getPrincipal();
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
         List<Role> roles = roleMapper.getRoleById(user.getId());
-        List<String> roleIds = new ArrayList<>();
+        List<String> ids = new ArrayList<>();
         for(int i=0;i<roles.size();i++){
             simpleAuthorizationInfo.addRole(roles.get(i).getRole());
-            roleIds.add(roles.get(i).getId());
+            ids.add(roles.get(i).getId());
         }
 
-        List<MenuAuth> menuAuths = menuAuthMapper.getAuthById(roleIds);
+        List<MenuAuth> menuAuths = menuAuthMapper.getAuthById(ids);
         for(int j=0;j<roles.size();j++){
             simpleAuthorizationInfo.addStringPermission(menuAuths.get(j).getAuthName());
         }
